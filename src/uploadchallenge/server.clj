@@ -1,22 +1,23 @@
 (ns uploadchallenge.server
   (:use
-   [clojure.core]
-   [ring.adapter.jetty]
-   [ring.middleware.multipart-params]
-   )
+   clojure.core
+   ring.adapter.jetty
+   clojure.tools.cli
+   ring.middleware.multipart-params)
 
   (:require [uploadchallenge.file-processor :as file-processor]
             [uploadchallenge.request        :as request]
             [uploadchallenge.routing        :as routing]
+            [uploadchallenge.conf           :as conf]
 
-            [clojure.data.json :as json]
-            [ring.middleware.params :as params]
-            [ring.util.response :as response]
-            [ring.middleware.resource :as resource]
+            [clojure.data.json         :as json]
+            [ring.middleware.params    :as params]
+            [ring.util.response        :as response]
+            [ring.middleware.resource  :as resource]
             [ring.middleware.file-info :as file-info]
 
             [clostache.parser :as clstch]
-            [clojure.java.io :as io]))
+            [clojure.java.io  :as io]))
 
 ;;
 ;; Route Handlers
@@ -120,12 +121,17 @@
 (defn -main
   "Routes, initializers and fun!"
   [& args]
-  (routing/add-route :get "/favicon.ico" #())
-  (routing/add-route :get "/" index)
-  (routing/add-route :get "/blobs" blobs)
-  (routing/add-route :post "/blobs" index)
-  (routing/add-route :get "/files/(.*)" file)
-  (routing/add-route :get "/blobs/(.*)" status)
-  (routing/add-route :post "/blobs/(.*)" update-description)
-  (routing/add-route :get "/javascripts/(.*).js" js)
-  (run-jetty app {:port 8080}))
+  (let [ [options] (cli args ["--config" "Configuration file to use" :default "config/development.clj"])]
+
+    (conf/initialize-config! (:config options))
+
+    (routing/add-route :get "/favicon.ico" #())
+    (routing/add-route :get "/" index)
+    (routing/add-route :get "/blobs" blobs)
+    (routing/add-route :post "/blobs" index)
+    (routing/add-route :get "/files/(.*)" file)
+    (routing/add-route :get "/blobs/(.*)" status)
+    (routing/add-route :post "/blobs/(.*)" update-description)
+    (routing/add-route :get "/javascripts/(.*).js" js)
+
+    (run-jetty app (:http conf/settings))))

@@ -3,6 +3,7 @@
   (:use
    [clojure.core])
   (:require [uploadchallenge.request        :as request]
+            [uploadchallenge.conf           :as conf]
             [clojure.java.io :as io]))
 
 (defonce files (atom {}))
@@ -45,7 +46,7 @@
 
 (defn- ^File make-temp-file [filename file-set]
   "Makes a temp file in a configured directory"
-  (let [temp-file (File. "/Users/alexp/store" filename)]
+  (let [temp-file (File. (get-in conf/settings [:storage :tmp-file-path]) filename)]
     (swap! file-set conj temp-file)
     (.deleteOnExit temp-file)
     temp-file))

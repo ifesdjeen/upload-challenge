@@ -7,7 +7,9 @@
   :dependencies [[org.clojure/clojure   "1.3.0"]
                  [org.clojure/data.json "0.1.2"]
                  [ring                  "1.1.0"]
-                 [de.ubercode.clostache/clostache "1.3.0"]]
+                 [de.ubercode.clostache/clostache "1.3.0"]
+                 [org.clojure/tools.cli "0.2.1"] ;; That one may have been easily avoided :)
+                 ]
 
   :profiles       {:deployment {} }
   :resource-paths ["src/resources"]
