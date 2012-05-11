@@ -10,7 +10,7 @@ export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 
 if [ ! -d $PIDDIR ]; then
   mkdir $PIDDIR
-  chown servicerunner.servicerunner $PIDDIR
+  chown $USER.$USER $PIDDIR
 fi
 
 case "$1" in
