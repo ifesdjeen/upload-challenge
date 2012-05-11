@@ -12,7 +12,5 @@
                  ]
 
   :profiles       {:deployment {} }
-  :source-paths   ["src/uploadchallenge"]
   :resource-paths ["src/resources"]
-  :main           uploadchallenge.server
-  :ring {:handler uploadchallenge.server/app})
+  :main           uploadchallenge.server)
