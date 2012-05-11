@@ -85,7 +85,7 @@
   []
   (let [files (vec (vals (file-processor/get-files)))]
     (-> (response/response (io!
-                            (clstch/render (str (get-in conf/settings [:storage :resource-path]) "templates/blobs.html.clostache") {:files (vec files)})))
+                            (clstch/render (slurp (str (get-in conf/settings [:storage :resource-path]) "templates/blobs.html.clostache")) {:files (vec files)})))
         (response/content-type "text/html"))))
 
 (defn index
