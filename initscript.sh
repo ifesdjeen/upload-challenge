@@ -4,7 +4,7 @@ PATH=/bin:/usr/bin:/sbin:/usr/sbin
 DAEMON=/a/uploadchallenge/current/run.sh
 PIDDIR=/a/uploadchallenge/current/tmp/pids
 PIDFILE="$PIDDIR/uploadchallenge.pid"
-USER="uploadchallenge"
+USER="linkflow"
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 
