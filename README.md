@@ -25,15 +25,20 @@ With (Leiningen 2)[https://github.com/technomancy/leiningen/wiki/Upgrading][-pre
 
 In order to generate ~100MB test file for upload, use
 
-   dd if=/dev/zero of=test.img bs=1024 count=0 seek=$[1024*100]
-
+```
+dd if=/dev/zero of=test.img bs=1024 count=0 seek=$[1024*100]
+```
 For ~1GB
 
-   dd if=/dev/zero of=test.img bs=1024 count=0 seek=$[1024*1000]
+```
+dd if=/dev/zero of=test.img bs=1024 count=0 seek=$[1024*1000]
+```
 
 When deployed, use run & initscript, that handles things via start-stop-daemon.
 
-     ./initscript.sh start # {stop}
+```
+./initscript.sh start # {stop}
+```
 
 ## License
 
