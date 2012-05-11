@@ -10,6 +10,7 @@ wrap-multipart-params in a (Ring)[https://github.com/mmcgrana/ring] way, I wrote
 # Pitfalls / known issues
 
   * Right now TMP files are removed whenever JVM is shut down.
+  * Files with special (e.q. German characters) chars and spaces are not handled correctly, that is also related to the problem mentioned in the next point
   * Store is a hash within an atom based on filename as a key, so obviously if 2 people decide to upload 1 file it's not going to work. Server has to generate and return a unique item ID upon upload, but that makes sense only in cases when we have real database persistency.
   * Upload status is fetched via iframe, and XHR upload progress is not employed. Better thought would of course be to use XHR progress when possible and fallback to iframe in cases it's not accessible.
   * There's no indication on when description was attached, for example. Best way of course would be to use X-Message-Info HTTP headers for that, but it requires quite a significant amount of work.
@@ -39,6 +40,16 @@ When deployed, use run & initscript, that handles things via start-stop-daemon. 
 ```
 ./initscript.sh start # {stop}
 ```
+
+Please, do not try uploading files more than 400Mb to the server, as a) if you run on 80 port, you have to be root b) app is hidden
+behind nginx server with
+
+```
+client_max_body_size 400M;
+```
+
+
+
 
 ## License
 
