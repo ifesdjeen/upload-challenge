@@ -74,7 +74,7 @@
   (let [req      (request/ring-request)
         filename (routing/extract-filename (:request-method req) (:uri req))]
     (-> (response/response (io!
-                            (slurp (str (get-in conf-settings [:storage :resource-path]) "javascripts/" filename ".js"))))
+                            (slurp (str (get-in conf/settings [:storage :resource-path]) "javascripts/" filename ".js"))))
         (response/content-type "application/javascript"))))
 
 (defn blobs
