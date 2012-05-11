@@ -74,7 +74,7 @@
   (let [req      (request/ring-request)
         filename (routing/extract-filename (:request-method req) (:uri req))]
     (-> (response/response (io!
-                            (slurp (str (get-in conf-settings [:storage :resource-path]) "javascripts/" filename ".js"))))
+                            (slurp (io/resource (str "javascripts/" filename ".js")))))
         (response/content-type "application/javascript"))))
 
 (defn blobs
@@ -85,7 +85,7 @@
   []
   (let [files (vec (vals (file-processor/get-files)))]
     (-> (response/response (io!
-                            (clstch/render (str (get-in conf/settings [:storage :resource-path]) "templates/blobs.html.clostache") {:files (vec files)})))
+                            (clstch/render-resource "templates/blobs.html.clostache" {:files (vec files)})))
         (response/content-type "text/html"))))
 
 (defn index
@@ -95,7 +95,7 @@
   "
   []
   (-> (response/response (io!
-                          (slurp (str (get-in conf/settings [:storage :resource-path]) "templates/index.html"))))
+                          (slurp (io/resource "templates/index.html"))))
       (response/content-type "text/html")))
 
 ;;
