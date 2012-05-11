@@ -13,18 +13,14 @@ $(document).ready(
     }
 
     // Initializes iframe listener,
-    function initialize_iframe_listener() {
-      $("#file-upload-iframe").ready(
-        function (){
-          $(".progress .bar").css("width", "100%");
-          $("#file-upload-submit").hide();
-          $("#description").show();
-        });
+    function finalize_progress() {
+      $(".progress .bar").css("width", "100%");
+      $("#file-upload-submit").hide();
+      $("#description").show();
     }
 
     // Starts periodic checks for upload status
     function start_upload_tracking() {
-      initialize_iframe_listener();
       setTimeout(check_upload_status, 1000);
     }
 
@@ -39,8 +35,10 @@ $(document).ready(
                   // and we'll get to know about it from iframe earlier than from status check.
                   if (!$("#description").is(":visible")) {
                     var done = a['uploaded-size'], total = a.size;
-                    var percentage = (Math.floor(done/total*1000)/10) + '%';
-                    $(".progress .bar").css("width", percentage);
+                    var percentage = (Math.ceil(done/total*1000)/10);
+                    if (percentage == 100)
+                      finalize_progress();
+                    $(".progress .bar").css("width", percentage + '%');
                     setTimeout(check_upload_status, 2000);
                   }
                 });

@@ -60,6 +60,7 @@
              temp-file (make-temp-file (:filename item) file-set)
              stream    (:stream item)]
 
+
          (add-file (:filename item) (:content-length (request/ring-request)))
 
          (io/copy (proxy [InputStream] []

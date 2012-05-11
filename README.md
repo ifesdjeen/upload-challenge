@@ -34,7 +34,7 @@ For ~1GB
 dd if=/dev/zero of=test.img bs=1024 count=0 seek=$[1024*1000]
 ```
 
-When deployed, use run & initscript, that handles things via start-stop-daemon.
+When deployed, use run & initscript, that handles things via start-stop-daemon. On local machine even 100MB complete in no time.
 
 ```
 ./initscript.sh start # {stop}
