@@ -7,6 +7,7 @@
 
   (:require [uploadchallenge.file-processor :as file-processor]
             [uploadchallenge.request        :as request]
+            [uploadchallenge.routing        :as routing]
 
             [clojure.data.json :as json]
             [ring.middleware.params :as params]
@@ -17,85 +18,99 @@
             [clostache.parser :as clstch]
             [clojure.java.io :as io]))
 
-(defonce routes (atom []))
+;;
+;; Route Handlers
+;;
 
-(defn add-route [method uri handler]
-  (swap! routes conj {:method method :uri uri :handler handler}))
+(defn update-description
+  "POST /blobs/:filename
 
-(defn reset-routes!
+  Updates Description for the given file"
   []
-  (reset! routes []))
-
-(defn find-route [method uri]
-  (let [finder (fn [i]
-                 (and (= (:method i) method)
-                      (not (nil? (re-find (re-pattern (str "^" (:uri i) "$")) uri)))))]
-    (first (filter finder @routes))))
-
-(defn match-route [method uri]
-  (let [route   (find-route method uri)
-        handler (:handler route)]
-    (if (nil? handler)
-      (println "Can't find handler for:" method uri (request/ring-request))
-      (handler))))
-
-(defn extract-filename
-  [method uri]
-  (let [route   (find-route method uri)
-        pattern (re-pattern (:uri route))
-        matches (re-find pattern uri)]
-    (second matches)))
-
-(defn update-description []
   (let [req        (request/ring-request)
         description (get-in req [:params "description"])
-        filename   (extract-filename (:request-method req) (:uri req))
+        filename   (routing/extract-filename (:request-method req) (:uri req))
         file-info  (file-processor/update-file filename :description description) ]
     (-> (response/response (json/json-str (file-processor/get-file filename)))
         (response/content-type "application/javascript"))))
 
+(defn status
+  "GET /blobs/:filename
 
-(defn status []
+  Returns JSON hash with current file status, usually looks like:
+
+      {\"tmp-file-name\":\"2.png\",\"filename\":\"2.png\",\"size\":998677,\"uploaded-size\":998491}
+
+  "
+  []
   (let [req           (request/ring-request)
-        filename      (extract-filename (:request-method req) (:uri req))
+        filename      (routing/extract-filename (:request-method req) (:uri req))
         file-info     (file-processor/get-file filename) ]
     (-> (response/response (json/json-str file-info))
         (response/content-type "application/javascript"))))
 
-(defn file []
+(defn file
+  "GET /files/:filename
+
+   Streams the file back to the client. Content-type 'application/force-download' is always used.
+   In order to implement mime type determinition, refer to https://github.com/michaelklishin/pantomime
+   or directly to Apache Tika.
+  "
+  []
   (let [req             (request/ring-request)
-        filename        (extract-filename (:request-method req) (:uri req))
+        filename        (routing/extract-filename (:request-method req) (:uri req))
         file-info       (file-processor/get-file filename)
         tmp-file        (io/file (:tmp-file-name file-info))]
     (-> (response/file-response (.getName tmp-file) {:root (str (.getParent tmp-file)) })
         (response/content-type "application/force-download"))))
 
+(defn js
+  "GET /javascripts/:filename.js
 
-(defn js []
+   Returns javascript resource, sets 'application/javascript' content-type.
+  "
+  []
   (let [req      (request/ring-request)
-        filename (extract-filename (:request-method req) (:uri req))]
+        filename (routing/extract-filename (:request-method req) (:uri req))]
     (-> (response/response (io!
                             (slurp (io/resource (str "javascripts/" filename ".js")))))
         (response/content-type "application/javascript"))))
 
-(defn blobs []
+(defn blobs
+  "GET /blobs
+
+   Renders list of currently present blobs in Clostache.
+  "
+  []
   (let [files (vec (vals (file-processor/get-files)))]
     (-> (response/response (io!
                             (clstch/render-resource "templates/blobs.html.clostache" {:files (vec files)})))
         (response/content-type "text/html"))))
 
-(defn index []
+(defn index
+  "GET /blobs
+
+   Renders pure HTML index page.
+  "
+  []
   (-> (response/response (io!
                           (slurp (io/resource "templates/index.html"))))
       (response/content-type "text/html")))
 
-(defn handler [params]
+;;
+;; Server and handling initialization
+;;
+
+(defn handler
+  "Default route-matching handler."
+  [params]
   (let [req (request/ring-request)]
-    (match-route (:request-method req) (:uri req))))
+    (routing/match-route (:request-method req) (:uri req))))
 
 (def app
+  "Main Application endpoint, sets up used Ring Middleware."
   (-> handler
-      (wrap-multipart-params { :store (file-processor/streamed-file-store) })
+      (wrap-multipart-params { :store (file-processor/streamed-file-store) }) ;; use custom processor to persist upload status
       (request/wrap-request-map)
       (resource/wrap-resource "public")
       (params/wrap-params)
@@ -103,13 +118,14 @@
 
 
 (defn -main
+  "Routes, initializers and fun!"
   [& args]
-  (add-route :get "/favicon.ico" #())
-  (add-route :get "/" index)
-  (add-route :get "/blobs" blobs)
-  (add-route :post "/blobs" index)
-  (add-route :get "/files/(.*)" file)
-  (add-route :get "/blobs/(.*)" status)
-  (add-route :post "/blobs/(.*)" update-description)
-  (add-route :get "/javascripts/(.*).js" js)
+  (routing/add-route :get "/favicon.ico" #())
+  (routing/add-route :get "/" index)
+  (routing/add-route :get "/blobs" blobs)
+  (routing/add-route :post "/blobs" index)
+  (routing/add-route :get "/files/(.*)" file)
+  (routing/add-route :get "/blobs/(.*)" status)
+  (routing/add-route :post "/blobs/(.*)" update-description)
+  (routing/add-route :get "/javascripts/(.*).js" js)
   (run-jetty app {:port 8080}))
