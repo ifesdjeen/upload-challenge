@@ -46,6 +46,8 @@
         <dl>
           <dd>Filename</dd>
           <dt>{{filename}}</dt>
+          <dd>Size</dd>
+          <dt>{{uploaded-size}} bytes</dt>
           <dd>Description</dd>
           <dt>{{description}}</dt>
           <dd>Download from:</dd>
