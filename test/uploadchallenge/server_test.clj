@@ -1,6 +1,7 @@
 (ns uploadchallenge.server-test
   (:use clojure.test
-        uploadchallenge.server))
+        uploadchallenge.server
+        uploadchallenge.routing))
 
 (deftest routes-test
   (testing "Adding a route"

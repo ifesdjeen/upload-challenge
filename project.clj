@@ -12,5 +12,8 @@
                  ]
 
   :profiles       {:deployment {} }
+  :source-path    "src"
   :resource-paths ["src/resources"]
+  :uberjar-exclusions [#"(?i)^META-INF/[^/]*\.SF$"]
+  :aot            [uploadchallenge.server]
   :main           uploadchallenge.server)

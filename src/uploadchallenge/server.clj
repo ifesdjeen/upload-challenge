@@ -1,4 +1,5 @@
 (ns uploadchallenge.server
+  (:gen-class)
   (:use
    clojure.core
    ring.adapter.jetty
@@ -119,7 +120,6 @@
 
 
 (defn -main
-  "Routes, initializers and fun!"
   [& args]
   (let [ [options] (cli args ["--config" "Configuration file to use" :default "config/development.clj"])]
 
