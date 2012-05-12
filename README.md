@@ -4,8 +4,47 @@ A little application that allows you to upload files and download them afterward
 
 # History
 
-First implementation attempts was with (noir)[https://github.com/ibdknox/noir], but because they do not allow using
-wrap-multipart-params in a (Ring)[https://github.com/mmcgrana/ring] way, I wrote it all using Ring.
+First implementation attempts was with [noir](https://github.com/ibdknox/noir), but because they do not allow using
+wrap-multipart-params in a [Ring](https://github.com/mmcgrana/ring) way, I wrote it all using Ring.
+
+Suggested solution: As not all the browsers have an ability to track upload progress, we'll create a hook that
+starts up in browser right after upload and queries backend for the upload status every X seconds.
+
+There are 2 ways of going further: first one is to [inherit from InputStream](https://github.com/ifesdjeen/upload-challenge/blob/master/src/uploadchallenge/file_processor.clj#L66), which is used
+internally by Ring, output stream results to the File and save amount of read bytes along the way.
+Another way would be to use ApacheCommons FileUpload, which allows tracking progress on a stream.
+File upload data (and descriptions, later on) are stored in [Atom hash](https://github.com/ifesdjeen/upload-challenge/blob/master/src/uploadchallenge/file_processor.clj#L9).
+
+A very basic routing is implemented. As we need to display multiple pages, we have to know which function on
+a backend should handle it. So we add a set of rules and some related handler as a set of rules
+
+```clojure
+;; will match all the files with .js extension under /javascripts/ dir
+(routing/add-route :get \"/javascripts/(.*).js\" js)
+
+;; matches an exact path
+(routing/add-route :post \"/blobs\" index)
+```
+
+Internally, whenever routing happens, we're matching route by passing current current request method and uri,
+for example:
+
+```clojure
+(def x (atom 0))
+(add-route :get \"/\" (fn []
+                      (reset! x 20)))
+(match-route :get \"/\") ;; will run reset x atom to 20
+(match-route :get \"/bazinga\") ;; will not match
+
+
+(def x (atom 0))
+(add-route :get \"/javascripts/(.*).js\" (fn []
+                                      (reset! x 20)))
+
+(match-route :get \"/javascripts/jquery.js\") ;; will reset x atom to 20
+(match-route :get \"/YABADABASCRIPTS/jquery.js\") ;; will not match
+```
+
 
 # Pitfalls / known issues
 
@@ -18,7 +57,7 @@ wrap-multipart-params in a (Ring)[https://github.com/mmcgrana/ring] way, I wrote
 
 ## Usage
 
-With (Leiningen 2)[https://github.com/technomancy/leiningen/wiki/Upgrading][-preview3]:
+With [Leiningen 2](https://github.com/technomancy/leiningen):
 
     lein2 deps
     lein2 test
