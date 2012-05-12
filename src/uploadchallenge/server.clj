@@ -29,10 +29,10 @@
 
   Updates Description for the given file"
   []
-  (let [req        (request/ring-request)
+  (let [req         (request/ring-request)
         description (get-in req [:params "description"])
-        filename   (routing/extract-filename (:request-method req) (:uri req))
-        file-info  (file-processor/update-file filename :description description) ]
+        filename    (routing/extract-filename (:request-method req) (:uri req))
+        file-info   (file-processor/update-file filename :description description) ]
     (-> (response/response (json/json-str (file-processor/get-file filename)))
         (response/content-type "application/javascript"))))
 
@@ -46,8 +46,8 @@
   "
   []
   (let [req           (request/ring-request)
-        filename      (routing/extract-filename (:request-method req) (:uri req))
-        file-info     (file-processor/get-file filename) ]
+        fileid        (routing/extract-filename (:request-method req) (:uri req))
+        file-info     (file-processor/get-file fileid) ]
     (-> (response/response (json/json-str file-info))
         (response/content-type "application/javascript"))))
 
@@ -60,8 +60,8 @@
   "
   []
   (let [req             (request/ring-request)
-        filename        (routing/extract-filename (:request-method req) (:uri req))
-        file-info       (file-processor/get-file filename)
+        fileid          (routing/extract-filename (:request-method req) (:uri req))
+        file-info       (file-processor/get-file fileid)
         tmp-file        (io/file (:tmp-file-name file-info))]
     (-> (response/file-response (.getName tmp-file) {:root (str (.getParent tmp-file)) })
         (response/content-type "application/force-download"))))
@@ -89,6 +89,11 @@
                             (clstch/render (slurp (str (get-in conf/settings [:storage :resource-path]) "templates/blobs.html.clostache")) {:files (vec files)})))
         (response/content-type "text/html"))))
 
+(defn rand-bytes
+  "Returns rather long random sequence that'll be used as an ID for blobs"
+  []
+  (.toString (java.math.BigInteger. 130 (java.security.SecureRandom.)) 32))
+
 (defn index
   "GET /blobs
 
@@ -96,7 +101,7 @@
   "
   []
   (-> (response/response (io!
-                          (slurp (str (get-in conf/settings [:storage :resource-path]) "templates/index.html"))))
+                          (clstch/render (slurp (str (get-in conf/settings [:storage :resource-path]) "templates/index.html.clostache")) {:file-id (str (rand-bytes))})))
       (response/content-type "text/html")))
 
 ;;
@@ -135,3 +140,9 @@
     (routing/add-route :get "/javascripts/(.*).js" js)
 
     (run-jetty app (:http conf/settings))))
+
+
+
+
+
+

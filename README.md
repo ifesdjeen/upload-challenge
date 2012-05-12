@@ -4,6 +4,7 @@ A little application that allows you to upload files and download them afterward
 
 # History
 
+## 80 Port
 As regards problem definition, I realize importance of running things on 80 port, but it's strongly discouraged to
 run main app on 80 port, as it requires root. Servers like nginx run master on 80 port, but have several workers that
 later proxy traffic to web servers or handle requests themselves.
@@ -16,11 +17,16 @@ and explain why I haven't launched it directly on 80, I've used the following ip
 iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
 ```
 
+## Noir
+
 First implementation attempts was with [noir](https://github.com/ibdknox/noir), but because they do not allow using
 wrap-multipart-params in a [Ring](https://github.com/mmcgrana/ring) way, I wrote it all using Ring.
 
+
+## Solution
 Suggested solution: As not all the browsers have an ability to track upload progress, we'll create a hook that
 starts up in browser right after upload and queries backend for the upload status every X seconds.
+
 
 There are 2 ways of going further: first one is to [inherit from InputStream](https://github.com/ifesdjeen/upload-challenge/blob/master/src/uploadchallenge/file_processor.clj#L66), which is used
 internally by Ring, output stream results to the File and save amount of read bytes along the way.
@@ -56,7 +62,6 @@ for example:
 (match-route :get \"/javascripts/jquery.js\") ;; will reset x atom to 20
 (match-route :get \"/YABADABASCRIPTS/jquery.js\") ;; will not match
 ```
-
 
 # Pitfalls / known issues
 

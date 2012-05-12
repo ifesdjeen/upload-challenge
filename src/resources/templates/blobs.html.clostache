@@ -49,7 +49,7 @@
           <dd>Description</dd>
           <dt>{{description}}</dt>
           <dd>Download from:</dd>
-          <dt><a href="/files/{{filename}}">here</a></dt>
+          <dt><a href="/files/{{blobid}}">here</a></dt>
         </dl>
       </li>
       {{/files}}

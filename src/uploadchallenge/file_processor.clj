@@ -10,18 +10,18 @@
 
 (defn add-file
   "Add file to in-memory Atom store"
-  [filename size]
-  (swap! files assoc filename {:filename filename :size size :uploaded-size 0}))
+  [id filename size]
+  (swap! files assoc id {:blobid id :filename filename :size size :uploaded-size 0}))
 
 (defn remove-file
   "Removes file from in-memory Atom store"
-  [filename size]
-  (swap! files dissoc filename))
+  [id size]
+  (swap! files dissoc id))
 
 (defn get-file
   "Returns frile by filename, from in-memory Atom store"
-  [filename]
-  (get @files filename))
+  [id]
+  (get @files id))
 
 (defn get-files
   "Get all the files from Atom"
@@ -37,12 +37,12 @@
 
          (update-file (:filename item) :uploaded-size bytes) ;; adds 'bytes' to current uploaded size
    "
-  ([filename & {:keys [uploaded-size description tmp-file-name] :or {uploaded-size 0} :as opts}]
-     (let [old-file          (get-file filename)
+  ([id & {:keys [uploaded-size description tmp-file-name] :or {uploaded-size 0} :as opts}]
+     (let [old-file           (get-file id)
            uploaded-size      (+ uploaded-size (:uploaded-size old-file))
            discard-nils       (apply dissoc opts (for [[k v] opts :when (nil? v)] k))
            with-uploaded-size (merge old-file (assoc discard-nils :uploaded-size uploaded-size))]
-       (swap! files assoc filename with-uploaded-size))))
+       (swap! files assoc id with-uploaded-size))))
 
 (defn- ^File make-temp-file [filename file-set]
   "Makes a temp file in a configured directory"
@@ -56,20 +56,21 @@
   "Stream file, save upload progress and persist its contents"
   ([& keys]
      (fn [item]
-       (let [file-set  (atom #{})
-             temp-file (make-temp-file (:filename item) file-set)
-             stream    (:stream item)]
+       (let [req            (request/ring-request)
+             file-upload-id (get-in req [:query-params "blobid"])
+             file-set       (atom #{})
+             temp-file      (make-temp-file (:filename item) file-set)
+             stream         (:stream item)]
 
-
-         (add-file (:filename item) (:content-length (request/ring-request)))
+         (add-file file-upload-id (:filename item) (:content-length (request/ring-request)))
 
          (io/copy (proxy [InputStream] []
                      (read [buffer]
                        (let [bytes (.read stream buffer)]
-                         (update-file (:filename item) :uploaded-size bytes)
+                         (update-file file-upload-id :uploaded-size bytes)
                          bytes))) temp-file)
 
-         (update-file (:filename item) :tmp-file-name (.getPath temp-file))
+         (update-file file-upload-id :tmp-file-name (.getPath temp-file))
          (-> (select-keys item [:filename :content-type])
              (assoc :tempfile temp-file
                     :size (.length temp-file)))))))

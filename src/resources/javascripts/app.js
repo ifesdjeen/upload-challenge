@@ -1,17 +1,6 @@
 $(document).ready(
   function() {
 
-    // Extracts filename out of the path, good for Chrome and IE
-    function extract_filename(filename) {
-      var file = "";
-      if(filename.indexOf('\\') != '-1') {
-        file = filename.split('\\');
-        var max = file.length;
-        filename = file[max-1];
-      }
-      return filename;
-    }
-
     // Initializes iframe listener,
     function finalize_progress() {
       $(".progress .bar").css("width", "100%");
@@ -26,8 +15,8 @@ $(document).ready(
 
     // Checks upload status and updates progress bar
     function check_upload_status() {
-      var filename = extract_filename($("#file-upload").val());
-      var url = "/blobs/" + filename;
+      var fileid = $("#file-upload-id").val();
+      var url = "/blobs/" + fileid;
 
       $.getJSON(url, {}, function( a,b,c ) {
                   // That check is here to prevent _any_ updates after upload was finished.
@@ -52,8 +41,8 @@ $(document).ready(
     // Sends description to the server
     $("#file-description-submit").click(
       function() {
-        var filename = extract_filename($("#file-upload").val());
-        var url = "/blobs/" + filename;
+        var fileid = $("#file-upload-id").val();
+        var url = "/blobs/" + fileid;
 
         $.ajax({
                  url: url,

@@ -40,7 +40,8 @@
     </div>
     <div class='container'>
 
-      <form action="/blobs" enctype="multipart/form-data" id="file-upload-form" method="post" target="file-upload-iframe">
+      <form action="/blobs?blobid={{file-id}}" enctype="multipart/form-data" id="file-upload-form" method="post" target="file-upload-iframe">
+        <input type="hidden" id="file-upload-id" name="file-upload-id" value="{{file-id}}" />
         <input type="file" id="file-upload" name="file-upload" />
         <input id="file-upload-submit" type="submit" value="Upload!" />
       </form>
