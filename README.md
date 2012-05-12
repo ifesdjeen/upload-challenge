@@ -63,6 +63,15 @@ for example:
 (match-route :get \"/YABADABASCRIPTS/jquery.js\") ;; will not match
 ```
 
+## Deployment
+
+Deployment is done by writing a couple of small bash scripts and some Capistrano. You can refer to
+[config/deploy.rb](https://github.com/ifesdjeen/upload-challenge/blob/master/src/uploadchallenge/config/deploy.rb),
+[run.sh](https://github.com/ifesdjeen/upload-challenge/blob/master/src/uploadchallenge/run.sh) and
+[init.sh](https://github.com/ifesdjeen/upload-challenge/blob/master/src/uploadchallenge/init.sh) scripts.
+
+More detailed description of deployment process was published just now to my blog: [http://coffeenco.de/articles/how_to_deploy_clojure_code.html](http://coffeenco.de/articles/how_to_deploy_clojure_code.html).
+
 # Pitfalls / known issues
 
   * Right now TMP files are removed whenever JVM is shut down.
