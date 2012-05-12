@@ -4,6 +4,18 @@ A little application that allows you to upload files and download them afterward
 
 # History
 
+As regards problem definition, I realize importance of running things on 80 port, but it's strongly discouraged to
+run main app on 80 port, as it requires root. Servers like nginx run master on 80 port, but have several workers that
+later proxy traffic to web servers or handle requests themselves.
+
+As Nginx performs buffering (even though it's configurable), for experiment to be clear I have decided to run app
+on the server on a different port (8080), but so that I could comply with the problem definition and not make excuses
+and explain why I haven't launched it directly on 80, I've used the following iptables rule:
+
+```
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
+```
+
 First implementation attempts was with [noir](https://github.com/ibdknox/noir), but because they do not allow using
 wrap-multipart-params in a [Ring](https://github.com/mmcgrana/ring) way, I wrote it all using Ring.
 
