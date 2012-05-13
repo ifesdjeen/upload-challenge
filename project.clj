@@ -14,6 +14,9 @@
   :profiles       {:deployment {} }
   :source-path    "src"
   :resource-paths ["src/resources"]
+  ;; it's likely to still be a Leiningen bug, please refer to an ongoing discussion here: https://github.com/technomancy/leiningen/issues/31#issuecomment-5675428
+  ;; Until it's fixed there, following line should be a part of project.clj for successfull uberjar and
+  ;; deployment.
   :uberjar-exclusions [#"(?i)^META-INF/[^/]*\.SF$"]
   :aot            [uploadchallenge.server]
   :main           uploadchallenge.server)
