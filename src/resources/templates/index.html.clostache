@@ -52,6 +52,7 @@
       </div>
 
       <div id="description" style="display: none">
+        <p>Your file was uploaded <a href="/files/{{file-id}}" target="_blank">here</a>, you can also add up a description below.</p>
         <textarea id="file-upload-description" name="file-upload-description"></textarea>
         <input id="file-description-submit" type="submit" value="Attach description!" />
       </div>
